@@ -3,7 +3,7 @@ var config = {
     authDomain: "train-schedule-hw07.firebaseapp.com",
     databaseURL: "https://train-schedule-hw07.firebaseio.com",
     projectId: "train-schedule-hw07",
-    storageBucket: "",
+    storageBucket: "train-schedule-hw07.appspot.com",
     messagingSenderId: "112191186713"
   };
 
@@ -11,13 +11,19 @@ var config = {
 
   var database = firebase.database();
 
+  var trainName;
+  var trainTime;
+  var destination;
+  var firstTrainTime;
+  var frequency;
+
   $("#add-train-button").on("click", function(event) {
       event.preventDefault();
 
-      var trainName = $("#train-name-input").val().trim();
-      var destination = $("#destination-input").val().trim();
-      var firstTrainTime = $("#first-time-input").val().trim();
-      var frequncy = $("#frequency-input").val().trim();      
+      trainName = $("#train-name-input").val().trim();
+      destination = $("#destination-input").val().trim();
+      firstTrainTime = $("#first-time-input").val().trim();
+      frequncy = $("#frequency-input").val().trim();      
 
       var newTrain = {
           name: trainName,
@@ -46,27 +52,34 @@ database.ref().on("child_added", function(childSnapshot) {
   
     // Store everything into a variable.
     var trainName = childSnapshot.val().name;
-    var trainDestination = childSnapshot.val().role;
-    var trainTime = childSnapshot.val().start;
-    var trainFrequency = childSnapshot.val().rate;
+    var trainDestination = childSnapshot.val().destination;
+    var trainTime = childSnapshot.val().time;
+    var trainFrequency = childSnapshot.val().frequency;
   
-    // Employee Info
-    console.log(empName);
-    console.log(empRole);
-    console.log(empStart);
-    console.log(empRate);
+    // Train Info
+    console.log(trainName);
+    console.log(trainDestination);
+    console.log(trainTime);
+    console.log(trainFrequency);
+
+
+    var trainTimeConverted = moment(firstTrainTime, "HH:mm").subtract(1, "years");
+    console.log(trainTimeConverted);
+
+    var currentTime = moment();
+    console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
+
+    var diffTime = moment().diff(moment(trainTimeConverted), "minutes");
+    console.log("DIFFERENCE IN TIME: " + diffTime);
   
-    // Prettify the employee start
-    var empStartPretty = moment.unix(empStart).format("MM/DD/YYYY");
-  
-    // Calculate the months worked using hardcore math
-    // To calculate the months worked
-    var empMonths = moment().diff(moment(empStart, "X"), "months");
-    console.log(empMonths);
-  
-    // Calculate the total billed rate
-    var empBilled = empMonths * empRate;
-    console.log(empBilled);
+    var tRemainder = diffTime % frequency;
+    console.log(tRemainder);
+
+    var tMinutesTillTrain = frequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+    var trainAway = moment().add(tMinutesTillTrain, "minutes");
+    console.log("ARRIVAL TIME: " + moment(trainAway).format("hh:mm"));
   
     // Create the new row
     var newRow = $("<tr>").append(
