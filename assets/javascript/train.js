@@ -50,18 +50,10 @@ $("#add-train-button").on("click", function (event) {
 database.ref().on("child_added", function (childSnapshot) {
     console.log("Stored Snapshot: ", childSnapshot.val());
 
-    // Store everything into a variable.
     var storedTrainName = childSnapshot.val().name;
     var storedTrainDestination = childSnapshot.val().destination;
     var storedTrainTime = childSnapshot.val().time;
     var storedTrainFrequency = childSnapshot.val().frequency;
-
-    // Train Info
-    console.log("Stored Train Name: ", storedTrainName);
-    console.log("Stored Train Destination: ", storedTrainDestination);
-    console.log("Stored Train Time: ", storedTrainTime);
-    console.log("Stored Train Frequency: ", storedTrainFrequency);
-
 
     var trainTimeConverted = moment(storedTrainTime, "HH:mm").subtract(1, "years");
     console.log("First train time converted: ", trainTimeConverted);
@@ -79,16 +71,36 @@ database.ref().on("child_added", function (childSnapshot) {
     console.log("Minutes till next Train: " + tMinutesTillTrain);
 
     var trainAway = moment().add(tMinutesTillTrain, "minutes");
-    console.log("Arrival Time: " + moment(trainAway).format("HH:mm"));
 
+    var arrivalTime = moment(trainAway).format("HH:mm");
+    console.log("Arrival Time: " + arrivalTime);
+
+    var storedTrain = {
+        name: storedTrainName,
+        destination: storedTrainDestination,
+        time: storedTrainTime,
+        frequency: storedTrainFrequency,
+        arrival: arrivalTime,
+        minutes: tMinutesTillTrain
+    };
+
+    // Stored Train Info
+    console.log("Stored Train Name: ", storedTrain.name);
+    console.log("Stored Train Destination: ", storedTrain.destination);
+    console.log("Stored Train Time: ", storedTrain.time);
+    console.log("Stored Train Frequency: ", storedTrain.frequency);
+    console.log("Stored Train Arrival: ", storedTrain.arrival);
+    console.log("Stored Train Minutes Away: ", storedTrain.minutes);
+
+
+    // Stored Train Displayed
     var newRow = $("<tr>").append(
         $("<td>").text(storedTrainName),
         $("<td>").text(storedTrainDestination),
         $("<td>").text(storedTrainFrequency),
-        $("<td>").text(moment(trainAway).format("HH:mm")),
-        $("<td>").text(tMinutesTillTrain)
+        $("<td>").text(storedTrain.arrival),
+        $("<td>").text(storedTrain.minutes)
     );
-
 
     $("#train-table > tbody").append(newRow);
 });
